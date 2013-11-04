@@ -71,7 +71,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
-
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioFormat.Encoding;
 
@@ -83,7 +82,8 @@ import javax.sound.sampled.AudioFormat.Encoding;
  *
  * @author Karl Helgason
  */
-public abstract class AudioFloatConverter {
+
+abstract class AudioFloatConverter {
 
     public static final Encoding PCM_FLOAT = new Encoding("PCM_FLOAT");
 
