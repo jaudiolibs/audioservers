@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -33,6 +33,8 @@ import java.util.logging.Logger;
 import org.jaudiolibs.audioservers.AudioClient;
 import org.jaudiolibs.audioservers.AudioConfiguration;
 import org.jaudiolibs.audioservers.AudioServer;
+import org.jaudiolibs.audioservers.ext.ClientID;
+import org.jaudiolibs.audioservers.ext.Connections;
 import org.jaudiolibs.jnajack.Jack;
 import org.jaudiolibs.jnajack.JackClient;
 import org.jaudiolibs.jnajack.JackException;
@@ -42,6 +44,7 @@ import org.jaudiolibs.jnajack.JackPortFlags;
 import org.jaudiolibs.jnajack.JackPortType;
 import org.jaudiolibs.jnajack.JackProcessCallback;
 import org.jaudiolibs.jnajack.JackShutdownCallback;
+import org.jaudiolibs.jnajack.JackStatus;
 
 /**
  * Implementation of AudioServer using Jack (via JNAJack)
@@ -50,12 +53,14 @@ import org.jaudiolibs.jnajack.JackShutdownCallback;
  */
 // @TODO check thread safety of client shutdown.
 public class JackAudioServer implements AudioServer {
+    
+    private final static Logger LOG = Logger.getLogger(JackAudioServer.class.getName());
 
     private enum State {
 
         New, Initialising, Active, Closing, Terminated
     };
-    private String id;
+    private ClientID clientID;
     private AudioConfiguration context;
     private AudioClient client;
     private Jack jack;
@@ -66,16 +71,26 @@ public class JackAudioServer implements AudioServer {
     private JackPort[] outputPorts;
     private List<FloatBuffer> outputBuffers;
     private Callback callback;
-    private boolean autoconnect;
+    private Connections connections;
 
     private JackAudioServer(String id, AudioConfiguration ctxt,
             boolean autoconnect, AudioClient client) {
-        this.id = id;
+        this(new ClientID(id),
+                autoconnect ? Connections.ALL : Connections.NONE,
+                ctxt,
+                client);  
+    }
+    
+    JackAudioServer(
+            ClientID id,
+            Connections connections,
+            AudioConfiguration ctxt,
+            AudioClient client) {
+        this.clientID = id;
+        this.connections = connections;
         this.context = ctxt;
         this.client = client;
-        this.autoconnect = autoconnect;
         state = new AtomicReference<State>(State.New);
-
     }
 
     public void run() throws Exception {
@@ -100,9 +115,17 @@ public class JackAudioServer implements AudioServer {
 
     private void initialise() throws Exception {
         jack = Jack.getInstance();
-        EnumSet<JackOptions> options = EnumSet.of(JackOptions.JackNoStartServer,
-                JackOptions.JackUseExactName);
-        jackclient = jack.openClient(id, options, null);
+        EnumSet<JackOptions> options =
+                (connections.isConnectInputs() || connections.isConnectOutputs()) ?
+                EnumSet.noneOf(JackOptions.class) :
+                EnumSet.of(JackOptions.JackNoStartServer);
+        EnumSet<JackStatus> status = EnumSet.noneOf(JackStatus.class);
+        try {
+            jackclient = jack.openClient(clientID.getIdentifier(), options, status);
+        } catch (JackException ex) {
+            LOG.log(Level.FINE, "Exception creating JACK client\nStatus set\n{0}", status);
+        }
+        LOG.log(Level.FINE, "JACK client created\nStatus set\n{0}", status);
         int count = context.getInputChannelCount();
         inputPorts = new JackPort[count];
         inputBuffers = Arrays.asList(new FloatBuffer[count]);
@@ -123,36 +146,56 @@ public class JackAudioServer implements AudioServer {
     private void runImpl() {
         try {
             // make sure context is correct.
+            ClientID id = clientID;
+            String actualID = jackclient.getName();
+            if (!id.getIdentifier().equals(actualID)) {
+                id = new ClientID(actualID);
+            }
             context = new AudioConfiguration(jackclient.getSampleRate(),
                     inputPorts.length,
                     outputPorts.length,
                     jackclient.getBufferSize(),
-                    true);
+                    id,
+                    connections,
+                    jackclient);
+            LOG.log(Level.FINE, "Configuring AudioClient\n{0}", context);
             client.configure(context);
             jackclient.setProcessCallback(new Callback());
             jackclient.onShutdown(new ShutDownHook());
             jackclient.activate();
-            if (autoconnect) {
-                autoconnect();
+            if (connections.isConnectInputs()) {
+                connectInputs();
+            }
+            if (connections.isConnectOutputs()) {
+                connectOutputs();
             }
             while (state.get() == State.Active) {
                 Thread.sleep(100); // @TODO switch to wait()
             }
         } catch (Exception ex) {
+            LOG.log(Level.FINE, "", ex);
             shutdown();
         }
     }
 
-    private void autoconnect() {
+    private void connectInputs() {
         try {
             String[] ins = jack.getPorts(jackclient, null, JackPortType.AUDIO,
                     EnumSet.of(JackPortFlags.JackPortIsOutput, JackPortFlags.JackPortIsPhysical));
-            String[] outs = jack.getPorts(jackclient, null, JackPortType.AUDIO,
-                    EnumSet.of(JackPortFlags.JackPortIsInput, JackPortFlags.JackPortIsPhysical));
             int inCount = Math.min(ins.length, inputPorts.length);
             for (int i=0; i<inCount; i++) {
                 jack.connect(jackclient, ins[i], inputPorts[i].getName());
             }
+        } catch (JackException ex) {
+            Logger.getLogger(JackAudioServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+    
+    private void connectOutputs() {
+        try {
+            String[] outs = jack.getPorts(jackclient, null, JackPortType.AUDIO,
+                    EnumSet.of(JackPortFlags.JackPortIsInput, JackPortFlags.JackPortIsPhysical));
             int outCount = Math.min(outs.length, outputPorts.length);
             for (int i=0; i<outCount; i++) {
                 jack.connect(jackclient, outputPorts[i].getName(), outs[i]);
@@ -235,6 +278,7 @@ public class JackAudioServer implements AudioServer {
      * @param client Audio client to process every Jack callback.
      * @return server 
      */
+    @Deprecated
     public static JackAudioServer create(String id, AudioConfiguration ctxt,
             boolean autoconnect, AudioClient client) {
         if (id == null || ctxt == null || client == null) {
