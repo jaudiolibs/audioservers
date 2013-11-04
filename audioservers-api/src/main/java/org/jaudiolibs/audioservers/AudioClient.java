@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * Copying and distribution of this file, with or without modification,
  * are permitted in any medium without royalty provided the copyright
@@ -32,7 +32,7 @@ public interface AudioClient {
     /**
      * This method will be called by the server implementation prior to any call
      * to process(). The supplied AudioConfiguration object provides information on
-     * sample rate, buffer size, etc. required by the client. An Exception may be
+     * sample rate, buffer size, etc. required by the server. An Exception may be
      * thrown if the client is unable to be configured to match the requirements of
      * the server. The type of the Exception is deliberately unspecified and left to
      * the implementation, but will commonly be an IllegalArgumentException or

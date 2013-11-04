@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2010 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * Copying and distribution of this file, with or without modification,
  * are permitted in any medium without royalty provided the copyright
@@ -16,9 +16,7 @@
 package org.jaudiolibs.audioservers;
 
 /**
- * A base interface for classes providing a server to run AudioClients. It is up
- * to implementations how the AudioClient is connected to the server - this will
- * usually happen at creation time.
+ * A base interface for classes providing a server to run AudioClients.
  *
  * AudioServers provide a run() method as it is intended that the application should
  * provide the Thread in which the server will run, however they do not extend

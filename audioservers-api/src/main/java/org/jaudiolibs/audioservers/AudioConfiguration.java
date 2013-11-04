@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2012 Neil C Smith.
+ * Copyright 2013 Neil C Smith.
  *
  * Copying and distribution of this file, with or without modification,
  * are permitted in any medium without royalty provided the copyright
@@ -14,13 +14,22 @@
  */
 package org.jaudiolibs.audioservers;
 
+import java.util.Iterator;
+import org.jaudiolibs.audioservers.util.ObjectLookup;
+
 /**
  * Provides details of the configuration of the server from which an AudioClient
  * will be called.
+ * 
+ * Instances of this class can maintain a list of arbitrary extension Objects 
+ * that can be accessed using the find() or findAll() methods. These provide a
+ * mechanism to pass additional configuration parameters when constructing servers
+ * or between server and client.
+ * 
  *
  * @author Neil C Smith
  */
-public class AudioConfiguration {
+public final class AudioConfiguration {
 
     private final float sampleRate;
     private final int inputChannelCount;
@@ -29,23 +38,18 @@ public class AudioConfiguration {
     private final boolean fixedBufferSize;
     private final ObjectLookup lookup;
 
+        
     /**
-     * Create an AudioConfiguration.
-     *
+     * Create an AudioConfiguration with fixed buffer size. Extension Objects
+     * passed into the constructor can be accessed using the find() or findAll()
+     * methods.
+     * 
      * @param sampleRate
      * @param inputChannelCount
      * @param outputChannelCount
-     * @param maxBufferSize
-     * @param fixedBufferSize
+     * @param bufferSize
+     * @param exts
      */
-    public AudioConfiguration(float sampleRate,
-            int inputChannelCount,
-            int outputChannelCount,
-            int maxBufferSize,
-            boolean fixedBufferSize) {
-        this(sampleRate, inputChannelCount, outputChannelCount, maxBufferSize, fixedBufferSize, (Object[]) null);
-    }
-    
     public AudioConfiguration(float sampleRate,
             int inputChannelCount,
             int outputChannelCount,
@@ -54,6 +58,17 @@ public class AudioConfiguration {
         this(sampleRate, inputChannelCount, outputChannelCount, bufferSize, true, exts);
     }
 
+    /**
+     * Create an AudioConfiguration. Extension Objects
+     * passed into the constructor can be accessed using the find() or findAll()
+     * methods.
+     * 
+     * @param sampleRate
+     * @param inputChannelCount
+     * @param outputChannelCount
+     * @param bufferSize
+     * @param exts
+     */
     public AudioConfiguration(float sampleRate,
             int inputChannelCount,
             int outputChannelCount,
@@ -70,6 +85,23 @@ public class AudioConfiguration {
         } else {
             lookup = new ObjectLookup(exts);
         }
+    }
+    
+    /**
+     * Create an AudioConfiguration without extensions.
+     *
+     * @param sampleRate
+     * @param inputChannelCount
+     * @param outputChannelCount
+     * @param maxBufferSize
+     * @param fixedBufferSize
+     */
+    public AudioConfiguration(float sampleRate,
+            int inputChannelCount,
+            int outputChannelCount,
+            int maxBufferSize,
+            boolean fixedBufferSize) {
+        this(sampleRate, inputChannelCount, outputChannelCount, maxBufferSize, fixedBufferSize, (Object[]) null);
     }
     
     private static float validate(float value, float minimum) {
@@ -134,10 +166,24 @@ public class AudioConfiguration {
     }
     
     
+    /**
+     * Find and return the first extension Object of the given type.
+     * 
+     * @param <T>
+     * @param type
+     * @return Object or null
+     */
     public <T> T find(Class<T> type) {
         return lookup.find(type);
     }
     
+    /**
+     * Find and return all extension Objects of the given type.
+     * 
+     * @param <T>
+     * @param type
+     * @return
+     */
     public <T> Iterable<T> findAll(Class<T> type) {
         return lookup.findAll(type);
     }
@@ -145,11 +191,20 @@ public class AudioConfiguration {
 
     @Override
     public String toString() {
-        return "Audio Configuration --- \n"
-                + "Sample Rate : " + sampleRate + "\n"
-                + "Input Channels : " + inputChannelCount + "\n"
-                + "Output Channels : " + outputChannelCount + "\n"
-                + "Max Buffer Size : " + maxBufferSize + "\n"
-                + "Fixed Buffer Size : " + fixedBufferSize;
+        StringBuilder sb = new StringBuilder("Audio Configuration --- \n");
+        sb.append("Sample Rate : ").append(sampleRate).append('\n');
+        sb.append("Input Channels : ").append(inputChannelCount).append('\n');
+        sb.append("Output Channels : ").append(outputChannelCount).append('\n');
+        sb.append("Max Buffer Size : ").append(maxBufferSize).append('\n');
+        sb.append("Fixed Buffer Size : ").append(fixedBufferSize).append('\n');
+        Iterator<Object> exts = findAll(Object.class).iterator();
+        if (exts.hasNext()) {
+            sb.append("Extensions -\n");
+            do {
+                Object o = exts.next();
+                sb.append(" -- ").append(o).append(" (").append(o.getClass()).append(")\n");
+            } while (exts.hasNext());
+        }
+        return sb.toString();
     }
 }
