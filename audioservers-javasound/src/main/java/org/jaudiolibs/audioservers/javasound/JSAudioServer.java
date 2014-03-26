@@ -46,8 +46,6 @@ import java.util.logging.Logger;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
-import javax.sound.sampled.Line;
-import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
@@ -70,18 +68,18 @@ public class JSAudioServer implements AudioServer {
     };
     private final static int NON_BLOCKING_MIN_BUFFER = 16384;
     // JS line defaults - need way to make these settable.
-    private int nonBlockingOutputRatio = 16;
-    private int lineBitSize = 16;
-    private boolean signed = true;
-    private boolean bigEndian = false;
+    private final static int nonBlockingOutputRatio = 16;
+    private final static int lineBitSize = 16;
+    private final static boolean signed = true;
+    private final static boolean bigEndian = false;
     //
-    private AtomicReference<State> state;
-    private AudioConfiguration context;
-//    private Mixer mixer;
-    private Mixer inputMixer;
-    private Mixer outputMixer;
-    private AudioClient client;
-    private JSTimingMode mode;
+    private final AtomicReference<State> state;
+    private final AudioConfiguration context;
+    private final Mixer inputMixer;
+    private final Mixer outputMixer;
+    private final AudioClient client;
+    private final JSTimingMode mode;
+    
     private TargetDataLine inputLine;
     private SourceDataLine outputLine;
     private byte[] inputByteBuffer;
@@ -212,7 +210,7 @@ public class JSAudioServer implements AudioServer {
         long now = startTime;
         double bufferTime = ((double) context.getMaxBufferSize()
                 / context.getSampleRate());
-        TimeFilter dll = new TimeFilter(bufferTime, 0.5);
+        TimeFilter dll = new TimeFilter(bufferTime, 1.5);
 //        bufferTime *= 1e9;
         long bufferCount = 0;
         int bufferSize = context.getMaxBufferSize();
