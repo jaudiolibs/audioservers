@@ -124,6 +124,7 @@ public class JackAudioServer implements AudioServer {
             jackclient = jack.openClient(clientID.getIdentifier(), options, status);
         } catch (JackException ex) {
             LOG.log(Level.FINE, "Exception creating JACK client\nStatus set\n{0}", status);
+            throw ex;
         }
         LOG.log(Level.FINE, "JACK client created\nStatus set\n{0}", status);
         int count = context.getInputChannelCount();
