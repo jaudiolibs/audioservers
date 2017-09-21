@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2013 Neil C Smith.
+ * Copyright 2017 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -323,9 +323,12 @@ public class JSAudioServer implements AudioServer {
         int channels = outputBuffers.size();
         for (int channel = 0; channel < channels; channel++) {
             FloatBuffer outBuf = outputBuffers.get(channel);
+            float out;
             float[] output = outBuf.array();
             for (int i = 0, x = channel; i < output.length; i++) {
-                outputFloatBuffer[x] = output[i];
+                out = output[i];
+                out = out < -1 ? -1 : out > 1 ? 1 : out;
+                outputFloatBuffer[x] = out;
                 x += channels;
             }
             outBuf.rewind();
