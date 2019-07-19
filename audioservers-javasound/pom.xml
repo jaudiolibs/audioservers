@@ -1,30 +1,55 @@
 <?xml version="1.0"?>
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.jaudiolibs</groupId>
     <artifactId>audioservers</artifactId>
     <version>1.2.0-SNAPSHOT</version>
   </parent>
+  
   <groupId>org.jaudiolibs</groupId>
   <artifactId>audioservers-javasound</artifactId>
-  <name>audioservers-javasound</name>
-  <url>http://maven.apache.org</url>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+  <name>AudioServers JavaSound</name>
+  <description>>JavaSound based implementation of the AudioServer API</description>
+
+  <licenses>
+    <license>
+      <name>GPLv2 with classpath exception</name>
+      <url>https://www.gnu.org/software/classpath/license.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Automatic-Module-Name>org.jaudiolibs.audioservers.javasound</Automatic-Module-Name>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.1</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
+    
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>audioservers-api</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
+  
 </project>

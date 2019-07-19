@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2013 Neil C Smith.
+ * Copyright 2019 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -17,7 +17,7 @@
  * along with this work; if not, see http://www.gnu.org/licenses/
  * 
  *
- * Please visit http://neilcsmith.net if you need additional information or
+ * Please visit https://www.neilcsmith.net if you need additional information or
  * have any questions.
  *
  */
