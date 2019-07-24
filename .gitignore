@@ -15,5 +15,6 @@ target/
 # NetBeans Files #
 /nbproject/
 nb-configuration.xml
+nbactions.xml
 
 .idea
