@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2019 Neil C Smith.
+ * Copyright 2020 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -16,10 +16,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this work; if not, see http://www.gnu.org/licenses/
  * 
- *
- * Please visit https://www.neilcsmith.net if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.audioservers.jack;
 
@@ -48,39 +44,28 @@ import org.jaudiolibs.jnajack.JackStatus;
 
 /**
  * Implementation of AudioServer using Jack (via JNAJack)
- *
- * @author Neil C Smith
  */
-// @TODO check thread safety of client shutdown.
 public class JackAudioServer implements AudioServer {
-    
+
     private final static Logger LOG = Logger.getLogger(JackAudioServer.class.getName());
 
     private enum State {
 
         New, Initialising, Active, Closing, Terminated
     };
-    private ClientID clientID;
+    private final ClientID clientID;
+    private final AudioClient client;
+    private final AtomicReference<State> state;
+    private final Connections connections;
+
     private AudioConfiguration context;
-    private AudioClient client;
     private Jack jack;
     private JackClient jackclient;
-    private AtomicReference<State> state;
     private JackPort[] inputPorts;
     private List<FloatBuffer> inputBuffers;
     private JackPort[] outputPorts;
     private List<FloatBuffer> outputBuffers;
-    private Callback callback;
-    private Connections connections;
 
-    private JackAudioServer(String id, AudioConfiguration ctxt,
-            boolean autoconnect, AudioClient client) {
-        this(new ClientID(id),
-                autoconnect ? Connections.ALL : Connections.NONE,
-                ctxt,
-                client);  
-    }
-    
     JackAudioServer(
             ClientID id,
             Connections connections,
@@ -90,9 +75,10 @@ public class JackAudioServer implements AudioServer {
         this.connections = connections;
         this.context = ctxt;
         this.client = client;
-        state = new AtomicReference<State>(State.New);
+        state = new AtomicReference<>(State.New);
     }
 
+    @Override
     public void run() throws Exception {
         if (!state.compareAndSet(State.New, State.Initialising)) {
             throw new IllegalStateException();
@@ -106,7 +92,7 @@ public class JackAudioServer implements AudioServer {
             throw ex;
         }
         if (state.compareAndSet(State.Initialising, State.Active)) {
-                runImpl();
+            runImpl();
         }
         closeAll();
         client.shutdown();
@@ -115,10 +101,10 @@ public class JackAudioServer implements AudioServer {
 
     private void initialise() throws Exception {
         jack = Jack.getInstance();
-        EnumSet<JackOptions> options =
-                (connections.isConnectInputs() || connections.isConnectOutputs()) ?
-                EnumSet.noneOf(JackOptions.class) :
-                EnumSet.of(JackOptions.JackNoStartServer);
+        EnumSet<JackOptions> options
+                = (connections.isConnectInputs() || connections.isConnectOutputs())
+                ? EnumSet.noneOf(JackOptions.class)
+                : EnumSet.of(JackOptions.JackNoStartServer);
         EnumSet<JackStatus> status = EnumSet.noneOf(JackStatus.class);
         try {
             jackclient = jack.openClient(clientID.getIdentifier(), options, status);
@@ -141,7 +127,7 @@ public class JackAudioServer implements AudioServer {
             outputPorts[i] = jackclient.registerPort("Output_" + (i + 1),
                     JackPortType.AUDIO, JackPortFlags.JackPortIsOutput);
         }
-        
+
     }
 
     private void runImpl() {
@@ -174,7 +160,7 @@ public class JackAudioServer implements AudioServer {
                 Thread.sleep(100); // @TODO switch to wait()
             }
         } catch (Exception ex) {
-            LOG.log(Level.FINE, "", ex);
+            LOG.log(Level.SEVERE, "", ex);
             shutdown();
         }
     }
@@ -184,25 +170,25 @@ public class JackAudioServer implements AudioServer {
             String[] ins = jack.getPorts(jackclient, null, JackPortType.AUDIO,
                     EnumSet.of(JackPortFlags.JackPortIsOutput, JackPortFlags.JackPortIsPhysical));
             int inCount = Math.min(ins.length, inputPorts.length);
-            for (int i=0; i<inCount; i++) {
+            for (int i = 0; i < inCount; i++) {
                 jack.connect(jackclient, ins[i], inputPorts[i].getName());
             }
         } catch (JackException ex) {
-            Logger.getLogger(JackAudioServer.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, "", ex);
         }
 
     }
-    
+
     private void connectOutputs() {
         try {
             String[] outs = jack.getPorts(jackclient, null, JackPortType.AUDIO,
                     EnumSet.of(JackPortFlags.JackPortIsInput, JackPortFlags.JackPortIsPhysical));
             int outCount = Math.min(outs.length, outputPorts.length);
-            for (int i=0; i<outCount; i++) {
+            for (int i = 0; i < outCount; i++) {
                 jack.connect(jackclient, outputPorts[i].getName(), outs[i]);
             }
         } catch (JackException ex) {
-            Logger.getLogger(JackAudioServer.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, "", ex);
         }
 
     }
@@ -213,13 +199,14 @@ public class JackAudioServer implements AudioServer {
         }
         for (int i = 0; i < outputPorts.length; i++) {
             outputBuffers.set(i, outputPorts[i].getFloatBuffer());
-            
+
         }
         client.process(System.nanoTime(), inputBuffers, outputBuffers, nframes);
     }
 
     private class Callback implements JackProcessCallback {
 
+        @Override
         public boolean process(JackClient client, int nframes) {
             if (state.get() != State.Active) {
                 return false;
@@ -238,20 +225,25 @@ public class JackAudioServer implements AudioServer {
 
     private class ShutDownHook implements JackShutdownCallback {
 
+        @Override
         public void clientShutdown(JackClient client) {
             shutdown();
         }
+
     }
 
+    @Override
     public AudioConfiguration getAudioContext() {
         return context;
     }
 
+    @Override
     public boolean isActive() {
         State st = state.get();
         return (st == State.Active || st == State.Closing);
     }
 
+    @Override
     public void shutdown() {
         State st;
         do {
@@ -265,26 +257,9 @@ public class JackAudioServer implements AudioServer {
     private void closeAll() {
         try {
             jackclient.close();
-        } catch (Throwable t) {}
+        } catch (Throwable t) {
+            LOG.log(Level.WARNING, "", t);
+        }
     }
 
-    /**
-     * Create a JackAudioServer.
-     *
-     *
-     * @param id Name of Jack client
-     * @param ctxt Requested audio configuration. The samplerate and buffer settings
-     * of the context will be ignored. These settings are taken from Jack itself.
-     * @param autoconnect Whether to connect inputs and outputs to first found physical ports
-     * @param client Audio client to process every Jack callback.
-     * @return server 
-     */
-    @Deprecated
-    public static JackAudioServer create(String id, AudioConfiguration ctxt,
-            boolean autoconnect, AudioClient client) {
-        if (id == null || ctxt == null || client == null) {
-            throw new NullPointerException();
-        }
-        return new JackAudioServer(id, ctxt, autoconnect, client);
-    }
 }

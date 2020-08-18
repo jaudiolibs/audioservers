@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2019 Neil C Smith.
+ * Copyright 2020 Neil C Smith.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Please visit https://www.neilcsmith.net if you need additional information or
- * have any questions.
- *
  */
 
 package org.jaudiolibs.audioservers;
@@ -37,8 +34,6 @@ import java.util.List;
  * necessary information will be passed from the server in the configure method
  * before any call to process().
  *
- *
- * @author Neil C Smith
  */
 public interface AudioClient {
 
@@ -50,8 +45,9 @@ public interface AudioClient {
      * the server. The type of the Exception is deliberately unspecified and left to
      * the implementation, but will commonly be an IllegalArgumentException or
      * IllegalStateException.
+     * 
      * @param context encapsulates information required for configuring the client
-     * @throws Exception
+     * @throws Exception if the server cannot be configured
      */
     public void configure(AudioConfiguration context) throws Exception;
 
@@ -75,10 +71,10 @@ public interface AudioClient {
      * The client should return a boolean value - true if the audio has been processed
      * OK, false to disconnect the client from the server.
      *
-     * @param time
-     * @param inputs
-     * @param outputs
-     * @param nframes
+     * @param time buffer time relative to {@link System#nanoTime()}
+     * @param inputs input buffers (may be empty)
+     * @param outputs output buffers
+     * @param nframes number of samples / frames per buffer
      * @return boolean (OK / disconnect)
      */
     public boolean process(long time, List<FloatBuffer> inputs,

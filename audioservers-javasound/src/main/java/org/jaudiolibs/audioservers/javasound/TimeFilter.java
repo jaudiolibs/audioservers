@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2019 Neil C Smith.
+ * Copyright 2020 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -29,10 +29,6 @@
  * derived from or based on this work. If you modify this work, you may extend
  * this exception to your version of the work, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
- *
- * Please visit https://www.neilcsmith.net if you need additional information or
- * have any questions.
- *
  * 
  * 
  * Ported from http://code.google.com/p/libtimefilter/
@@ -75,7 +71,6 @@ package org.jaudiolibs.audioservers.javasound;
 
 /**
  *
- * @author Neil C Smith
  */
 class TimeFilter {
 

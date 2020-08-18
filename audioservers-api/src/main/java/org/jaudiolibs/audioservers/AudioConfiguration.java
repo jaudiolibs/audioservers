@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2019 Neil C Smith.
+ * Copyright 2020 Neil C Smith.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,11 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Please visit https://www.neilcsmith.net if you need additional information or
- * have any questions.
- *
  */
-
 package org.jaudiolibs.audioservers;
 
 import java.util.Iterator;
@@ -34,14 +30,12 @@ import org.jaudiolibs.audioservers.util.ObjectLookup;
 /**
  * Provides details of the configuration of the server from which an AudioClient
  * will be called.
- * 
- * Instances of this class can maintain a list of arbitrary extension Objects 
- * that can be accessed using the find() or findAll() methods. These provide a
- * mechanism to pass additional configuration parameters when constructing servers
- * or between server and client.
- * 
  *
- * @author Neil C Smith
+ * Instances of this class can maintain a list of arbitrary extension Objects
+ * that can be accessed using the find() or findAll() methods. These provide a
+ * mechanism to pass additional configuration parameters when constructing
+ * servers or between server and client.
+ *
  */
 public final class AudioConfiguration {
 
@@ -52,43 +46,44 @@ public final class AudioConfiguration {
     private final boolean fixedBufferSize;
     private final ObjectLookup lookup;
 
-        
     /**
      * Create an AudioConfiguration with fixed buffer size. Extension Objects
      * passed into the constructor can be accessed using the find() or findAll()
      * methods.
-     * 
-     * @param sampleRate
-     * @param inputChannelCount
-     * @param outputChannelCount
-     * @param bufferSize
-     * @param exts
+     *
+     * @param sampleRate requested sample rate in Hz
+     * @param inputChannelCount requested number of input channels
+     * @param outputChannelCount requested number of output channels
+     * @param bufferSize the size (in samples) of each buffer to process
+     * @param exts system extensions
      */
     public AudioConfiguration(float sampleRate,
             int inputChannelCount,
             int outputChannelCount,
             int bufferSize,
-            Object ... exts) {
+            Object... exts) {
         this(sampleRate, inputChannelCount, outputChannelCount, bufferSize, true, exts);
     }
 
     /**
-     * Create an AudioConfiguration. Extension Objects
-     * passed into the constructor can be accessed using the find() or findAll()
-     * methods.
-     * 
-     * @param sampleRate
-     * @param inputChannelCount
-     * @param outputChannelCount
-     * @param bufferSize
-     * @param exts
+     * Create an AudioConfiguration. Extension Objects passed into the
+     * constructor can be accessed using the find() or findAll() methods.
+     *
+     * @param sampleRate requested sample rate in Hz
+     * @param inputChannelCount requested number of input channels
+     * @param outputChannelCount requested number of output channels
+     * @param maxBufferSize the maximum size (in samples) of each buffer to
+     * process
+     * @param fixedBufferSize whether buffer size is always equal to
+     * maxBufferSize
+     * @param exts system extensions
      */
     public AudioConfiguration(float sampleRate,
             int inputChannelCount,
             int outputChannelCount,
             int maxBufferSize,
             boolean fixedBufferSize,
-            Object ... exts) {
+            Object... exts) {
         this.sampleRate = validate(sampleRate, 1);
         this.inputChannelCount = validate(inputChannelCount, 0);
         this.outputChannelCount = validate(outputChannelCount, 0);
@@ -100,15 +95,17 @@ public final class AudioConfiguration {
             lookup = new ObjectLookup(exts);
         }
     }
-    
+
     /**
      * Create an AudioConfiguration without extensions.
      *
-     * @param sampleRate
-     * @param inputChannelCount
-     * @param outputChannelCount
-     * @param maxBufferSize
-     * @param fixedBufferSize
+     * @param sampleRate requested sample rate in Hz
+     * @param inputChannelCount requested number of input channels
+     * @param outputChannelCount requested number of output channels
+     * @param maxBufferSize the maximum size (in samples) of each buffer to
+     * process
+     * @param fixedBufferSize whether buffer size is always equal to
+     * maxBufferSize
      */
     public AudioConfiguration(float sampleRate,
             int inputChannelCount,
@@ -117,14 +114,14 @@ public final class AudioConfiguration {
             boolean fixedBufferSize) {
         this(sampleRate, inputChannelCount, outputChannelCount, maxBufferSize, fixedBufferSize, (Object[]) null);
     }
-    
+
     private static float validate(float value, float minimum) {
         if (value < minimum) {
             throw new IllegalArgumentException();
         }
         return value;
     }
-    
+
     private static int validate(int value, int minimum) {
         if (value < minimum) {
             throw new IllegalArgumentException();
@@ -134,7 +131,8 @@ public final class AudioConfiguration {
 
     /**
      * Is the buffer size fixed. If variable, the buffer size will always be
-     * between 1 and getMaxBufferSize().
+     * between 1 and getMaxBufferSize(). If fixed will always be equal to
+     * getMaxBufferSize().
      *
      * @return true if fixed, otherwise variable.
      */
@@ -178,11 +176,10 @@ public final class AudioConfiguration {
     public float getSampleRate() {
         return sampleRate;
     }
-    
-    
+
     /**
      * Find and return the first extension Object of the given type.
-     * 
+     *
      * @param <T>
      * @param type
      * @return Object or null
@@ -190,10 +187,10 @@ public final class AudioConfiguration {
     public <T> T find(Class<T> type) {
         return lookup.find(type);
     }
-    
+
     /**
      * Find and return all extension Objects of the given type.
-     * 
+     *
      * @param <T>
      * @param type
      * @return
@@ -201,7 +198,6 @@ public final class AudioConfiguration {
     public <T> Iterable<T> findAll(Class<T> type) {
         return lookup.findAll(type);
     }
-    
 
     @Override
     public String toString() {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2019 Neil C Smith.
+ * Copyright 2020 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -29,9 +29,6 @@
  * derived from or based on this work. If you modify this work, you may extend
  * this exception to your version of the work, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
- *
- * Please visit https://www.neilcsmith.net if you need additional information or
- * have any questions.
  */
 package org.jaudiolibs.audioservers.javasound;
 
@@ -53,11 +50,10 @@ import org.jaudiolibs.audioservers.AudioServerProvider;
 import org.jaudiolibs.audioservers.ext.Device;
 
 /**
- *
- * @author Neil C Smith
+ * JavaSound implementation of AudioServerProvider.
  */
 public class JSAudioServerProvider extends AudioServerProvider {
-    
+
     private final static Logger LOG = Logger.getLogger(JSAudioServerProvider.class.getName());
 
     @Override
@@ -92,8 +88,8 @@ public class JSAudioServerProvider extends AudioServerProvider {
         Device outputDevice = findOutputDevice(config);
         Mixer outputMixer = outputDevice == null ? null : outputDevice.find(Mixer.class);
         JSTimingMode timingMode = findTimingMode(config);
-        
-        ArrayList<Object> exts = new ArrayList<Object>();
+
+        ArrayList<Object> exts = new ArrayList<>();
         if (inputDevice != null) {
             exts.add(inputDevice);
         }
@@ -101,14 +97,14 @@ public class JSAudioServerProvider extends AudioServerProvider {
             exts.add(outputDevice);
         }
         exts.add(timingMode);
-        
+
         config = new AudioConfiguration(
                 config.getSampleRate(),
                 config.getInputChannelCount(),
                 config.getOutputChannelCount(),
                 config.getMaxBufferSize(),
                 exts.toArray());
-        
+
         if (LOG.isLoggable(Level.FINE)) {
             StringBuilder sb = new StringBuilder();
             sb.append("Building JSAudioServer\n");
@@ -117,10 +113,10 @@ public class JSAudioServerProvider extends AudioServerProvider {
             sb.append("Output Mixer : ").append(outputMixer).append('\n');
             LOG.fine(sb.toString());
         }
-        
+
         return new JSAudioServer(inputMixer, outputMixer, timingMode, config, client);
     }
-    
+
     private static Device findInputDevice(AudioConfiguration config) {
         for (Device dev : config.findAll(Device.class)) {
             if (dev.getMaxInputChannels() > 0) {
@@ -144,39 +140,11 @@ public class JSAudioServerProvider extends AudioServerProvider {
         }
         return null;
     }
-    
-    private static Mixer findInputMixer(AudioConfiguration config) {
-        Mixer ret = null;
-        for (Device dev : config.findAll(Device.class)) {
-            if (dev.getMaxInputChannels() > 0) {
-                ret = dev.find(Mixer.class);
-                if (ret != null) {
-                    break;
-                }
-            }
-        }
-        return ret;
-    }
-    
-    private static Mixer findOutputMixer(AudioConfiguration config) {
-        Mixer ret = null;
-        for (Device dev : config.findAll(Device.class)) {
-            if (dev.getMaxOutputChannels() > 0) {
-                ret = dev.find(Mixer.class);
-                if (ret != null) {
-                    break;
-                }
-            }
-        }
-        return ret;
-    }
-
-    
 
     private static JSTimingMode findTimingMode(AudioConfiguration config) {
         JSTimingMode mode = config.find(JSTimingMode.class);
         if (mode == null) {
-            return JSTimingMode.Estimated;
+            return JSTimingMode.Blocking;
         } else {
             return mode;
         }
@@ -187,7 +155,7 @@ public class JSAudioServerProvider extends AudioServerProvider {
         if (mixerInfos.length == 0) {
             return Collections.emptyList();
         }
-        List<Device> devices = new ArrayList<Device>(mixerInfos.length);
+        List<Device> devices = new ArrayList<>(mixerInfos.length);
         for (Mixer.Info info : mixerInfos) {
             Mixer mixer = AudioSystem.getMixer(info);
             int ins = getMaximumChannels(mixer, true);

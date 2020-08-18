@@ -21,43 +21,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Please visit https://www.neilcsmith.net if you need additional information or
- * have any questions.
- *
  */
-
 package org.jaudiolibs.audioservers.ext;
 
 /**
  * This extension can be used to control whether the AudioServer is connected to
- * a physical device (soundcard). It only makes sense where the underlying library
- * supports running without being directly connected to a physical device
- * (currently only JACK).
- * 
- * Libraries that support this extension should ensure the correct instance of this class
- * is included in the AudioConfiguration passed to the AudioClient. 
- * 
- * @author Neil C Smith
+ * a physical device (soundcard). It only makes sense where the underlying
+ * library supports running without being directly connected to a physical
+ * device (eg. JACK).
+ *
+ * Libraries that support this extension should ensure the correct instance of
+ * this class is included in the AudioConfiguration passed to the AudioClient.
+ *
  */
 public class Connections {
-    
+
     public final static Connections NONE = new Connections(false, false);
     public final static Connections INPUT = new Connections(true, false);
     public final static Connections OUTPUT = new Connections(false, true);
     public final static Connections ALL = new Connections(true, true);
-    
+
     private final boolean connectInputs;
     private final boolean connectOutputs;
-    
+
     private Connections(boolean connectInputs, boolean connectOutputs) {
         this.connectInputs = connectInputs;
         this.connectOutputs = connectOutputs;
     }
 
+    /**
+     * Check whether connected to physical device inputs.
+     * 
+     * @return connected to physical inputs
+     */
     public boolean isConnectInputs() {
         return connectInputs;
     }
 
+    /**
+     * Check whether connected to physical device outputs.
+     * 
+     * @return connected to physical outputs
+     */
     public boolean isConnectOutputs() {
         return connectOutputs;
     }
@@ -104,7 +109,5 @@ public class Connections {
             }
         }
     }
-    
-    
-    
+
 }

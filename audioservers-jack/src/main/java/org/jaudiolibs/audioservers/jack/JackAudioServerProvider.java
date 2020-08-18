@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2019 Neil C Smith.
+ * Copyright 2020 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published
@@ -16,10 +16,6 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this work; if not, see http://www.gnu.org/licenses/
  * 
- *
- * Please visit https://www.neilcsmith.net if you need additional information or
- * have any questions.
- *
  */
 package org.jaudiolibs.audioservers.jack;
 
@@ -31,8 +27,7 @@ import org.jaudiolibs.audioservers.ext.ClientID;
 import org.jaudiolibs.audioservers.ext.Connections;
 
 /**
- *
- * @author Neil C Smith
+ * Implementation of AudioServerProvider using Jack (via JNAJack)
  */
 public class JackAudioServerProvider extends AudioServerProvider {
 

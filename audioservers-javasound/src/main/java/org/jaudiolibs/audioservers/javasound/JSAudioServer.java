@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2019 Neil C Smith.
+ * Copyright 2020 Neil C Smith.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
@@ -30,8 +30,6 @@
  * this exception to your version of the work, but you are not obligated to do so.
  * If you do not wish to do so, delete this exception statement from your version.
  *
- * Please visit https://www.neilcsmith.net if you need additional information or
- * have any questions.
  */
 package org.jaudiolibs.audioservers.javasound;
 
@@ -55,8 +53,6 @@ import org.jaudiolibs.audioservers.AudioServer;
 
 /**
  * Implementation of an AudioServer using Javasound.
- *
- * @author Neil C Smith
  */
 public class JSAudioServer implements AudioServer {
 
@@ -100,9 +96,10 @@ public class JSAudioServer implements AudioServer {
         this.context = context;
         this.mode = mode;
         this.client = client;
-        state = new AtomicReference<State>(State.New);
+        state = new AtomicReference<>(State.New);
     }
 
+    @Override
     public void run() throws Exception {
         if (!state.compareAndSet(State.New, State.Initialising)) {
             throw new IllegalStateException();
@@ -124,15 +121,18 @@ public class JSAudioServer implements AudioServer {
         state.set(State.Terminated);
     }
 
+    @Override
     public AudioConfiguration getAudioContext() {
         return context;
     }
 
+    @Override
     public boolean isActive() {
         State st = state.get();
         return (st == State.Active || st == State.Closing);
     }
 
+    @Override
     public void shutdown() {
         State st;
         do {
@@ -188,12 +188,12 @@ public class JSAudioServer implements AudioServer {
         converter = AudioFloatConverter.getConverter(outputFormat);
 
         // create client buffers
-        List<FloatBuffer> ins = new ArrayList<FloatBuffer>(inputChannels);
+        List<FloatBuffer> ins = new ArrayList<>(inputChannels);
         for (int i = 0; i < inputChannels; i++) {
             ins.add(FloatBuffer.allocate(buffersize));
         }
         inputBuffers = Collections.unmodifiableList(ins);
-        List<FloatBuffer> outs = new ArrayList<FloatBuffer>(outputChannels);
+        List<FloatBuffer> outs = new ArrayList<>(outputChannels);
         for (int i = 0; i < outputChannels; i++) {
             outs.add(FloatBuffer.allocate(buffersize));
         }
@@ -267,7 +267,7 @@ public class JSAudioServer implements AudioServer {
                 }
             }
         } catch (Exception ex) {
-            Logger.getLogger(JSAudioServer.class.getName()).log(Level.SEVERE, "", ex);
+            LOG.log(Level.SEVERE, "", ex);
         }
     }
 

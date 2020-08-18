@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2019 Neil C Smith.
+ * Copyright 2020 Neil C Smith.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Please visit https://www.neilcsmith.net if you need additional information or
- * have any questions.
- *
  */
 
 package org.jaudiolibs.audioservers.util;
@@ -34,7 +31,6 @@ import java.util.ArrayList;
  * A utility class that can be used to implement find() and findAll() support for
  * extension Objects.
  * 
- * @author Neil C Smith (http://neilcsmith.net)
  */
 public final class ObjectLookup {
     

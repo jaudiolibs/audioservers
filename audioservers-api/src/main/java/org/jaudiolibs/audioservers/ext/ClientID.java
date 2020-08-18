@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2019 Neil C Smith.
+ * Copyright 2020 Neil C Smith.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,27 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Please visit https://www.neilcsmith.net if you need additional information or
- * have any questions.
- *
  */
-
 package org.jaudiolibs.audioservers.ext;
 
 /**
- * 
+ *
  * Provide an ID for how the library refers to the AudioClient, internally or in
  * any user interface.
- * 
- * Libraries that support this feature should ensure the correct value is passed in
- * to the AudioConfiguration provided to the AudioClient.
- * 
- * @author Neil C Smith (http://neilcsmith.net)
+ *
+ * Libraries that support this feature should ensure the correct value is passed
+ * in to the AudioConfiguration provided to the AudioClient.
+ *
  */
 public class ClientID {
-      
+
     private String identifier;
-    
+
     public ClientID(String identifier) {
         if (identifier == null) {
             throw new NullPointerException();
@@ -49,6 +44,11 @@ public class ClientID {
         this.identifier = identifier;
     }
 
+    /**
+     * Get the client identifier.
+     *
+     * @return client identifier
+     */
     public String getIdentifier() {
         return identifier;
     }
@@ -61,7 +61,7 @@ public class ClientID {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof ClientID) {
-            return ((ClientID)obj).identifier.equals(identifier);
+            return ((ClientID) obj).identifier.equals(identifier);
         }
         return false;
     }
@@ -70,7 +70,5 @@ public class ClientID {
     public int hashCode() {
         return identifier.hashCode();
     }
-    
-    
-    
+
 }
